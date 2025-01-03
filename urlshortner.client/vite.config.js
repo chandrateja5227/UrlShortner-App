@@ -45,12 +45,15 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     },
-    server: {
-        proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
-            }
+  server: {
+
+        proxy: {           
+            '^/st': {
+            target,
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/st/, '/st')
+          }
         },
         port: 2510,
         https: {
