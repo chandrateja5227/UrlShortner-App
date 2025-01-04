@@ -8,10 +8,12 @@ namespace UrlShortner.Server.Controllers
     public class UrlController : ControllerBase
     {
         private readonly UrlService _urlService;
+        private readonly IConfiguration _configuration;
 
-        public UrlController(UrlService urlService)
+        public UrlController(UrlService urlService, IConfiguration configuration)
         {
             _urlService = urlService;
+            _configuration = configuration;
         }
 
         [HttpPost("shorten")]
@@ -35,7 +37,9 @@ namespace UrlShortner.Server.Controllers
             
             if (longUrl == null)
             {
-                return NotFound();
+                // Get the client app URL from configuration
+                var clientUrl = _configuration["ClientApp:BaseUrl"] ?? "https://localhost:2510";
+                return Redirect($"{clientUrl}/not-found");
             }
 
             return Redirect(longUrl);

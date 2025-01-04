@@ -1,5 +1,4 @@
 using UrlShortner.Server.Interfaces;
-using UrlShortner.Server.Models;
 
 namespace UrlShortner.Server.Services
 {
@@ -40,7 +39,11 @@ namespace UrlShortner.Server.Services
             var shortCode = GenerateShortCode();
             
             // Save to Solr
-            await _searchService.SaveUrlMappingAsync(shortCode, longUrl);
+            var success = await _searchService.SaveUrlMappingAsync(shortCode, longUrl);
+            if (!success)
+            {
+                throw new Exception("Failed to save URL mapping");
+            }
             
             // Cache the mapping
             await _cacheService.SetAsync($"url:{shortCode}", longUrl, TimeSpan.FromHours(24));
@@ -50,7 +53,6 @@ namespace UrlShortner.Server.Services
 
         private string GenerateShortCode()
         {
-            // Simple implementation - replace with more robust solution
             return Guid.NewGuid().ToString("N").Substring(0, 6);
         }
     }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="urlshortener" version="1.6">
+    <!-- Unique identifier field -->
+    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    
+    <!-- Core URL fields -->
+    <field name="short_code" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="long_url" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="created_date" type="pdate" indexed="true" stored="true" required="true"/>
+    <field name="expiry_date" type="pdate" indexed="true" stored="true"/>
+    <field name="click_count" type="plong" indexed="true" stored="true" default="0"/>
+    
+    <!-- Analytics fields -->
+    <field name="last_accessed" type="pdate" indexed="true" stored="true"/>
+    <field name="domain" type="string" indexed="true" stored="true"/>
+    <field name="is_active" type="boolean" indexed="true" stored="true" default="true"/>
+    
+    <!-- Search optimization fields -->
+    <field name="url_text" type="text_general" indexed="true" stored="false"/>
+    <field name="_version_" type="plong" indexed="false" stored="false"/>
+    
+    <!-- Dynamic fields for future extensibility -->
+    <dynamicField name="metadata_*" type="string" indexed="true" stored="true"/>
+    <dynamicField name="stats_*" type="plong" indexed="true" stored="true"/>
+    
+    <!-- Field types -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+    <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
+    <fieldType name="pdate" class="solr.DatePointField" docValues="true"/>
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+    
+    <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer class="solr.StandardTokenizerFactory"/>
+            <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.StandardTokenizerFactory"/>
+            <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+        </analyzer>
+    </fieldType>
+    
+    <!-- Unique key -->
+    <uniqueKey>id</uniqueKey>
+    
+    <!-- Copy fields for search optimization -->
+    <copyField source="long_url" dest="url_text"/>
+    <copyField source="long_url" dest="domain"/>
+</schema>

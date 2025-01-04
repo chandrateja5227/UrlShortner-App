@@ -13,14 +13,6 @@ builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 builder.Services.AddSingleton<ISearchService, SolrSearchService>();
 builder.Services.AddScoped<UrlService>();
 
-// TODO: Add Redis configuration
-// builder.Services.AddStackExchangeRedisCache(options => {
-//     options.Configuration = builder.Configuration.GetConnectionString("Redis");
-// });
-
-// TODO: Add Solr configuration
-// builder.Services.AddSolrNet<UrlMapping>("http://localhost:8983/solr/urlshortener");
-
 var app = builder.Build();
 
 app.UseDefaultFiles();
