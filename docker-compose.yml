@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: urlshortner-frontend
+    build:
+      context: ./urlshortner.client
+      dockerfile: Dockerfile
+    ports:
+      - "2510:80"
+    volumes:
+      - ./urlshortner.client/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    container_name: urlshortner-backend
+    build:
+      context: ./UrlShortner.Server
+      dockerfile: Dockerfile
+    ports:
+      - "7224:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Redis=redis:6379
+      - Solr__BaseUrl=http://solr:8983/solr/urlshortener
+      - ClientApp__BaseUrl=http://localhost:2510
+    networks:
+      - app-network
+    depends_on:
+      - redis
+      - solr
+
+  redis:
+    container_name: urlshortner-redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    command: redis-server --appendonly yes
+
+  solr:
+    container_name: urlshortner-solr
+    image: solr:8
+    ports:
+      - "8983:8983"
+    volumes:
+      - ./solr-config/conf:/opt/solr/server/solr/configsets/urlshortener/conf:ro
+      - solr_data:/var/solr
+    networks:
+      - app-network
+    command:
+      - solr-precreate
+      - urlshortener
+      - /opt/solr/server/solr/configsets/urlshortener
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  solr_data:

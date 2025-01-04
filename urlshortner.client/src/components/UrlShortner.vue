@@ -254,8 +254,6 @@ h2 {
     flex-direction: column;
   }
   
-  button {
-    width: 100%;
-  }
+ 
 }
 </style>

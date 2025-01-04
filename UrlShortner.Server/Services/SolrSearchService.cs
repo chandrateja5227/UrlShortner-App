@@ -1,7 +1,5 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using UrlShortner.Server.Interfaces;
-using UrlShortner.Server.Models;
 
 namespace UrlShortner.Server.Services
 {
@@ -13,19 +11,17 @@ namespace UrlShortner.Server.Services
         public SolrSearchService(IConfiguration configuration)
         {
             _httpClient = new HttpClient();
-            _solrUrl = configuration["Solr:BaseUrl"] ?? "http://localhost:8983/solr/urlshortener";
+            _solrUrl = configuration["Solr:BaseUrl"] ?? "http://solr:8983/solr/urlshortener";
         }
 
         public async Task<string> GetLongUrlAsync(string shortCode)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_solrUrl}/select?q=short_code:{shortCode}&fl=long_url");
+                var response = await _httpClient.GetAsync($"{_solrUrl}/select?q=short_code:{shortCode}");
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Solr Response: {content}"); // Debug log
-                
                 using var doc = JsonDocument.Parse(content);
                 var docs = doc.RootElement.GetProperty("response").GetProperty("docs");
                 
@@ -49,7 +45,7 @@ namespace UrlShortner.Server.Services
             {
                 var document = new
                 {
-                    id = Guid.NewGuid().ToString(),
+                    id = shortCode,  // Use shortCode as ID
                     short_code = shortCode,
                     long_url = longUrl,
                     domain = new Uri(longUrl).Host,
@@ -58,20 +54,15 @@ namespace UrlShortner.Server.Services
                     is_active = true
                 };
 
-                var jsonContent = JsonSerializer.Serialize(new[] { document });
-                Console.WriteLine($"Sending to Solr: {jsonContent}"); // Debug log
-
                 var content = new StringContent(
-                    jsonContent,
+                    JsonSerializer.Serialize(new[] { document }),
                     System.Text.Encoding.UTF8,
                     "application/json"
                 );
 
                 var response = await _httpClient.PostAsync($"{_solrUrl}/update?commit=true", content);
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Solr Response: {responseContent}"); // Debug log
-
                 response.EnsureSuccessStatusCode();
+
                 return true;
             }
             catch (Exception ex)
@@ -85,34 +76,26 @@ namespace UrlShortner.Server.Services
         {
             try
             {
-                // First, get the document ID using shortcode
-                var response = await _httpClient.GetAsync($"{_solrUrl}/select?q=short_code:{shortCode}&fl=id");
-                response.EnsureSuccessStatusCode();
-
-                var content = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(content);
-                var docs = doc.RootElement.GetProperty("response").GetProperty("docs");
-                
-                if (docs.GetArrayLength() > 0)
+                // Solr atomic update with shortCode as ID
+                var update = new
                 {
-                    var id = docs[0].GetProperty("id").GetString();
-                    
-                    // Now update the click count
-                    var update = new
-                    {
-                        id = id,
-                        click_count = new { inc = 1 }
-                    };
+                    id = shortCode,
+                    click_count = new { inc = 1 }
+                };
 
-                    var updateContent = new StringContent(
-                        JsonSerializer.Serialize(new[] { update }),
-                        System.Text.Encoding.UTF8,
-                        "application/json"
-                    );
+                var content = new StringContent(
+                    JsonSerializer.Serialize(new[] { update }),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
 
-                    var updateResponse = await _httpClient.PostAsync($"{_solrUrl}/update?commit=true", updateContent);
-                    updateResponse.EnsureSuccessStatusCode();
-                }
+                var response = await _httpClient.PostAsync($"{_solrUrl}/update?commit=true", content);
+                
+                // Log the response for debugging
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Solr update response: {responseContent}");
+                
+                response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
             {

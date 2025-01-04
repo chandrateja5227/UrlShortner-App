@@ -25,7 +25,10 @@ namespace UrlShortner.Server.Controllers
             }
 
             var shortCode = await _urlService.CreateShortUrlAsync(longUrl);
-            var shortUrl = $"{Request.Scheme}://{Request.Host}/st/{shortCode}";
+            
+            // Get the frontend URL from configuration
+            var frontendUrl = _configuration["ClientApp:BaseUrl"] ?? "http://localhost:2510";
+            var shortUrl = $"{frontendUrl}/st/{shortCode}";
             
             return Ok(shortUrl);
         }
@@ -37,8 +40,7 @@ namespace UrlShortner.Server.Controllers
             
             if (longUrl == null)
             {
-                // Get the client app URL from configuration
-                var clientUrl = _configuration["ClientApp:BaseUrl"] ?? "https://localhost:2510";
+                var clientUrl = _configuration["ClientApp:BaseUrl"] ?? "http://localhost:2510";
                 return Redirect($"{clientUrl}/not-found");
             }
 

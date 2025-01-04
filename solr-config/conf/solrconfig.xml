@@ -8,6 +8,13 @@
     
     <schemaFactory class="ClassicIndexSchemaFactory"/>
     
+    <!-- Add updateLog for atomic updates -->
+    <updateHandler class="solr.DirectUpdateHandler2">
+        <updateLog>
+            <str name="dir">${solr.ulog.dir:}</str>
+        </updateLog>
+    </updateHandler>
+    
     <indexConfig>
         <lockType>${solr.lock.type:native}</lockType>
         <infoStream>true</infoStream>
@@ -27,6 +34,4 @@
     </requestHandler>
     
     <requestHandler name="/update" class="solr.UpdateRequestHandler"/>
-    
-    <!-- Removed problematic admin handler -->
 </config>
