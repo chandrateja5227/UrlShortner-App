@@ -117,7 +117,12 @@ export default {
 
     async copyToClipboard() {
       try {
-        await navigator.clipboard.writeText(this.shortUrl);
+              const el = document.createElement('textarea');
+      el.value = this.shortUrl;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
         this.copied = true;
         setTimeout(() => {
           this.copied = false;

@@ -27,7 +27,7 @@ namespace UrlShortner.Server.Controllers
             var shortCode = await _urlService.CreateShortUrlAsync(longUrl);
             
             // Get the frontend URL from configuration
-            var frontendUrl = _configuration["ClientApp:BaseUrl"] ?? "http://localhost:2510";
+            var frontendUrl = Environment.GetEnvironmentVariable("ClientApp__BaseUrl")  ?? "http://localhost:2510";
             var shortUrl = $"{frontendUrl}/st/{shortCode}";
             
             return Ok(shortUrl);
