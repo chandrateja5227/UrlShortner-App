@@ -16,4 +16,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_URLS=http://+:80
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:80/health || exit 1
 ENTRYPOINT ["dotnet", "UrlShortner.Server.dll"]
