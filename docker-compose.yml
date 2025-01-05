@@ -7,11 +7,7 @@ services:
       context: ./urlshortner.client
       dockerfile: Dockerfile
       args:
-<<<<<<< HEAD
-        - VITE_API_URL=http://13.60.43.224:5000
-=======
         - VITE_API_URL=/st
->>>>>>> 21043b7 (aws deploy fix)
     ports:
       - "0.0.0.0:8080:80"
     volumes:
@@ -33,7 +29,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Redis=redis:6379
       - Solr__BaseUrl=http://solr:8983/solr/urlshortener
-      - ClientApp__BaseUrl=http://13.60.43.224:8080
+      - ClientApp__BaseUrl=http://13.60.24.188:8080
     networks:
       - app-network
     restart: always
