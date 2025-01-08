@@ -26,8 +26,6 @@ The project uses Docker to create a multi-container environment, simplifying the
 ### Prerequisites
 Ensure the following are installed on your local system:
 - Docker
-- Docker Compose
-
 ### Instructions to Run the Application
 
 1. **Clone the Repository**
