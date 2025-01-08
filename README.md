@@ -14,7 +14,7 @@ UrlShortener is a web application designed for shortening URLs and providing eff
 ## Deployment Setup
 The project uses Docker to create a multi-container environment, simplifying the deployment of all components. Docker Compose is used to manage the containers.
 
-### Port Configuration
+### Port Configuration info
 | Component   | Service Port | Docker Host Port |
 |-------------|--------------|------------------|
 | Client      | 2510         | 80               |
